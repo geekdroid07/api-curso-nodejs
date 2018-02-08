@@ -7,7 +7,8 @@ const Schema = mongoose.Schema
 let CourseScheme = new Schema({
 	name: String,
 	horario: String,
-	price: Number
+	price: String,
+	image: String
 })
 
 
