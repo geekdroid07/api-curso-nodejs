@@ -1,5 +1,6 @@
 const User = require('../models/users')
 const bcrypt = require('bcrypt-nodejs')
+const jwt = require('../services/jwt')
 
 function getAllUser(req, res) {
     User.find({}, (err, users)=>{
@@ -43,9 +44,28 @@ function saveUser(req, res) {
 
 function login(req, res) {
     let email = req.body.email;
-
+    let password = req.body.password;
+    
     User.findOne({email: email.toLowerCase()}, (err, userStored)=>{
-        
+        if(err) return res.status(500).send({message: `error al iniciar sesion ${err}`})
+      
+        if(userStored) {
+            bcrypt.compare(password, userStored.password, (err, check)=>{
+                if(err) return res.status(500).send({message: `error al iniciar sesion ${err}`})
+
+                if(check) {
+                    return res.status(200).send({
+                        userStored,
+                        token: jwt.createToken(userStored)
+                    })
+                } else {
+                    return res.status(400).send({message: 'no se pudo iniciar sesion revisa tus datos'})
+                }
+            })
+        } else {
+            return res.status(400).send({message: 'este usuario no existe, favor registrarte'})
+        }     
+
     })
 }
 
